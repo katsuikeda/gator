@@ -42,7 +42,7 @@ func handlerLogin(s *state, cmd command) error {
 
 	userName := cmd.args[0]
 
-	_, err := s.db.GetUsers(context.Background(), userName)
+	_, err := s.db.GetUser(context.Background(), userName)
 	if err != nil {
 		return fmt.Errorf("couldn't find user: %w", err)
 	}
