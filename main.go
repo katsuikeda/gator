@@ -1,14 +1,17 @@
 package main
 
 import (
-	"fmt"
+	"database/sql"
 	"log"
 	"os"
 
 	"github.com/katsuikeda/gator/internal/config"
+	"github.com/katsuikeda/gator/internal/database"
+	_ "github.com/lib/pq"
 )
 
 type state struct {
+	db  *database.Queries
 	cfg *config.Config
 }
 
@@ -17,9 +20,16 @@ func main() {
 	if err != nil {
 		log.Fatalf("error reading config: %v", err)
 	}
-	fmt.Printf("Read config: %+v\n", cfg)
+
+	db, err := sql.Open("postgres", cfg.DBURL)
+	if err != nil {
+		log.Fatalf("error connecting to db: %v", err)
+	}
+	defer db.Close()
+	dbQueries := database.New(db)
 
 	programState := &state{
+		db:  dbQueries,
 		cfg: &cfg,
 	}
 
@@ -27,9 +37,10 @@ func main() {
 		registeredCommands: make(map[string]func(*state, command) error),
 	}
 	cmds.register("login", handlerLogin)
+	cmds.register("register", handlerRegister)
 
 	if len(os.Args) < 2 {
-		log.Fatal("command name not provided")
+		log.Fatal("Usage: cli <command> [args...]")
 	}
 
 	cmd := command{
@@ -39,12 +50,6 @@ func main() {
 
 	err = cmds.run(programState, cmd)
 	if err != nil {
-		log.Fatalf("error executing command: %v", err)
+		log.Fatal(err)
 	}
-
-	cfg, err = config.Read()
-	if err != nil {
-		log.Fatalf("error reading config: %v", err)
-	}
-	fmt.Printf("Updated config: %+v\n", cfg)
 }
