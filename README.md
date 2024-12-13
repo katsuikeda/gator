@@ -1,107 +1,59 @@
 # gator
 
-An RSS feed aggregator in Go.
-
-## Overview
-
-Gator is a command-line tool for aggregating and managing RSS feeds. It allows users to register, follow, and browse RSS feeds, as well as manage user accounts.
-
-## Features
-
-- Register and manage user accounts
-- Add and follow RSS feeds
-- Fetch and aggregate RSS feed data
-- Browse aggregated posts
-- List followed feeds and users
+A multi-user command line tool for aggregating RSS feeds and viewing the posts.
 
 ## Installation
 
-1. Clone the repository:
+Make sure you have the latest [Go toolchain](https://golang.org/dl/) installed as well as a local PostgreSQL database. You can then install `gator` with:
 
-    ```sh
-    git clone https://github.com/katsuikeda/gator.git
-    cd gator
-    ```
-
-2. Install dependencies:
-
-    ```sh
-    go mod download
-    ```
-
-3. Set up the database:
-
-    ```sh
-    # Ensure PostgreSQL is running and create a database
-    createdb gator
-
-    # Apply the schema
-    goose -dir sql/schema postgres "user=youruser dbname=gator sslmode=disable" up
-    ```
+```bash
+go install github.com/katsuikeda/gator@latest
+```
 
 ## Configuration
 
-Create a configuration file at `~/.gatorconfig.json` with the following content:
+Create a configuration file `.gatorconfig.json` in your home directory with the following structure:
 
 ```json
 {
-    "db_url": "postgres://youruser:yourpassword@localhost/gator?sslmode=disable",
-    "current_user_name": "default_user"
+    "db_url": "postgres://username:@localhost:5432/database?sslmode=disable"
 }
-
-## Usage
-Run the `gator` command-line tool with the following commands:
-
-- Register a new user:
-
-```sh
-gator register <username>
 ```
 
-- Login as an existing user:
+Replace the values with your database connection string.
 
-```sh
-gator login <username>
+## Usage
+
+Run the `gator` command-line tool with the following commands:
+
+- Create a new user:
+
+```bash
+gator register <username>
 ```
 
 - Add and follow a new RSS feed:
 
-```sh
-gator addfeed <feed_name> <feed_url>
+```bash
+gator addfeed <feed_url>
 ```
 
-- List all feeds:
+- Start the aggregator:
 
-```sh
-gator feeds
+```bash
+gator agg 30s
 ```
 
-- Follow a feed:
+- View aggregated feed posts
 
-```sh
-gator follow <feed_url>
-```
-
-- Unfollow a feed:
-
-```sh
-gator unfollow <feed_url>
-```
-
-- List followed feeds:
-  
-```sh
-gator following
-```
-
-- Aggregate feeds:
-
-```sh
-gator agg <time_between_requests>
-```
-
-- Browse aggregated feed posts
-
-```sh
+```bash
 gator browse [limit]
 ```
+
+There are a few other commands you'll need as well:
+
+- `gator login <name>` - Log in as a user that already exists
+- `gator users` - List all users
+- `gator feeds` - List all feeds
+- `gator follow <url>` - Follow a feed that already exists in the database
+- `gator unfollow <url>` - Unfollow a feed that already exists in the database
